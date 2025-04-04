@@ -2,14 +2,15 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getAllCategories = async (showDeleted: string) => {
-  return await prisma.category.findMany({
-    where:
-      showDeleted === "true"
-        ? {}
-        : showDeleted === "onlyDeleted"
-        ? { deleted_at: { not: null } }
-        : { deleted_at: null },
-  });
+  let whereCondition = {};
+
+  if (showDeleted === "onlyDeleted") {
+    whereCondition = { deleted_at: { not: null } }; // Sadece silinmiş kategoriler
+  } else if (showDeleted !== "true") {
+    whereCondition = { deleted_at: null }; // Sadece aktif kategoriler
+  }
+
+  return await prisma.category.findMany({ where: whereCondition });
 };
 
 export const getCategoryById = async (id: number) => {
@@ -20,9 +21,7 @@ export const getCategoryById = async (id: number) => {
 
 export const createCategory = async (name: string) => {
   return await prisma.category.create({
-    data: {
-      name,
-    },
+    data: { name },
   });
 };
 

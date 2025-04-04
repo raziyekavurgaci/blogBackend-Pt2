@@ -4,27 +4,39 @@ const prisma = new PrismaClient();
 export const getAllPosts = async (
   showDeleted: string,
   status: string,
-  category?: number
+  category?: number,
+  tag?: string
 ) => {
-  const where: any = {};
+  let whereCondition: Record<string, any> = {};
 
-  if (showDeleted === "true") {
-    where.deleted_at = undefined;
-  } else if (showDeleted === "onlyDeleted") {
-    where.deleted_at = { not: null };
-  } else {
-    where.deleted_at = null;
+  if (showDeleted === "onlyDeleted") {
+    whereCondition.deleted_at = { not: null };
+  } else if (showDeleted !== "true") {
+    whereCondition.deleted_at = null;
   }
+
   if (category !== undefined) {
-    where.category = category;
+    whereCondition.category_id = category;
   }
 
   if (status === "published") {
-    where.published_at = { not: null };
+    whereCondition.published_at = { not: null };
   } else if (status === "draft") {
-    where.published_at = null;
+    whereCondition.published_at = null;
   }
-  return await prisma.post.findMany({ where });
+  if (tag) {
+    const tagIds = tag.split(",").map((id) => Number(id));
+    whereCondition.tags = {
+      some: {
+        id: { in: tagIds },
+      },
+    };
+
+    return await prisma.post.findMany({
+      where: whereCondition,
+      include: { post_tags: true },
+    });
+  }
 };
 
 export const getPostById = async (id: number) => {
