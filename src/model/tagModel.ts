@@ -7,7 +7,7 @@ export const getAllTags = async () => {
 
 export const getTagById = async (id: number) => {
   return await prisma.tag.findUnique({
-    where: { id: id.toString() },
+    where: { id },
   });
 };
 
@@ -21,7 +21,7 @@ export const createTag = async (data: { name: string }) => {
 
 export const updateTag = async (id: number, data: { name: string }) => {
   return await prisma.tag.update({
-    where: { id: id.toString() },
+    where: { id },
     data: {
       name: data.name,
     },
@@ -30,6 +30,6 @@ export const updateTag = async (id: number, data: { name: string }) => {
 
 export const deleteTag = async (id: number) => {
   return await prisma.tag.delete({
-    where: { id: id.toString() },
+    where: { id },
   });
 };

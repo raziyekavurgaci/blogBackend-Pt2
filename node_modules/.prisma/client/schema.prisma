@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Category {
-  id         String    @id @default(uuid())
+  id         Int       @id @default(autoincrement())
   name       String
   created_at DateTime  @default(now())
   deleted_at DateTime?
@@ -25,8 +25,8 @@ model Category {
 }
 
 model Post {
-  id           String    @id @default(uuid())
-  category_id  String
+  id           Int       @id @default(autoincrement())
+  category_id  Int
   title        String
   content      String
   created_at   DateTime  @default(now())
@@ -41,8 +41,8 @@ model Post {
 }
 
 model Comment {
-  id             String   @id @default(uuid())
-  post_id        String
+  id             Int      @id @default(autoincrement())
+  post_id        Int
   content        String
   commenter_name String
   created_at     DateTime @default(now())
@@ -53,7 +53,7 @@ model Comment {
 }
 
 model Tag {
-  id   String @id @default(uuid())
+  id   Int    @id @default(autoincrement())
   name String
 
   post_tags PostTag[] @relation("PostToTag")
@@ -62,8 +62,8 @@ model Tag {
 }
 
 model PostTag {
-  post_id String
-  tag_id  String
+  post_id Int
+  tag_id  Int
 
   post Post @relation("PostToTag", fields: [post_id], references: [id])
   tag  Tag  @relation("PostToTag", fields: [tag_id], references: [id])

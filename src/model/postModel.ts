@@ -6,28 +6,30 @@ export const getAllPosts = async (
   status: string,
   category?: number
 ) => {
-  return await prisma.post.findMany({
-    where: {
-      deleted_at:
-        showDeleted === "true"
-          ? undefined
-          : showDeleted === "onlyDeleted"
-          ? { not: null }
-          : null,
-      category_id: category ? category.toString() : undefined,
-      published_at:
-        status === "published"
-          ? { not: null }
-          : status === "draft"
-          ? null
-          : undefined,
-    },
-  });
+  const where: any = {};
+
+  if (showDeleted === "true") {
+    where.deleted_at = undefined;
+  } else if (showDeleted === "onlyDeleted") {
+    where.deleted_at = { not: null };
+  } else {
+    where.deleted_at = null;
+  }
+  if (category !== undefined) {
+    where.category = category;
+  }
+
+  if (status === "published") {
+    where.published_at = { not: null };
+  } else if (status === "draft") {
+    where.published_at = null;
+  }
+  return await prisma.post.findMany({ where });
 };
 
 export const getPostById = async (id: number) => {
   return await prisma.post.findUnique({
-    where: { id: id.toString(), deleted_at: null },
+    where: { id, deleted_at: null },
   });
 };
 
@@ -37,11 +39,7 @@ export const createPost = async (data: {
   category_id: number;
 }) => {
   return await prisma.post.create({
-    data: {
-      title: data.title,
-      content: data.content,
-      category_id: data.category_id.toString(),
-    },
+    data,
   });
 };
 
@@ -50,17 +48,14 @@ export const updatePost = async (
   data: { title?: string; content?: string; category_id?: number }
 ) => {
   return await prisma.post.update({
-    where: { id: id.toString() },
-    data: {
-      ...data,
-      category_id: data.category_id?.toString(),
-    },
+    where: { id },
+    data,
   });
 };
 
 export const deletePost = async (id: number) => {
   return await prisma.post.update({
-    where: { id: id.toString() },
+    where: { id },
     data: { deleted_at: new Date() },
   });
 };

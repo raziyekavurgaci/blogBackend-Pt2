@@ -14,7 +14,7 @@ export const getAllCategories = async (showDeleted: string) => {
 
 export const getCategoryById = async (id: number) => {
   return await prisma.category.findUnique({
-    where: { id: id.toString(), deleted_at: null },
+    where: { id, deleted_at: null },
   });
 };
 
@@ -28,14 +28,14 @@ export const createCategory = async (name: string) => {
 
 export const updateCategory = async (id: number, name: string) => {
   return await prisma.category.update({
-    where: { id: id.toString() },
+    where: { id },
     data: { name },
   });
 };
 
 export const deleteCategory = async (id: number) => {
   return await prisma.category.update({
-    where: { id: id.toString() },
+    where: { id },
     data: { deleted_at: new Date() },
   });
 };
