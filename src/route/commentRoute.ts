@@ -9,10 +9,9 @@ import {
 
 const router = Router();
 
-router.get("/", listComments);
-router.get("/:id", getComment);
-router.post("/", addComment);
-router.put("/:id", updatedComment);
-router.delete("/:id", deletedComment);
-
+router.get("/api/comments", listComments);
+router.get("/api/comments/:id", getComment);
+router.post("/api/comments", addComment);
+router.put("/api/comments/:id", updatedComment);
+router.delete("/api/comments/:id", deletedComment);
 export default router;

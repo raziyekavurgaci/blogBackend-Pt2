@@ -1,43 +1,66 @@
-import db from "src/config/db";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-export const getAllPosts = (
+export const getAllPosts = async (
   showDeleted: string,
   status: string,
-  category: number
+  category?: number
 ) => {
-  const query = db("posts");
-  if (showDeleted === "true") {
-  } else if (showDeleted === "onlyDeleted") {
-    query.whereNot("deleted_at", null);
-  } else {
-    query.where("deleted_at", null);
-  }
-
-  if (category) {
-    query.where("category_id", category);
-  }
-
-  if (status === "published") {
-    query.whereNot("published_at", null);
-  } else if (status === "draft") {
-    query.where("published_at", null);
-  }
-
-  return query;
+  return await prisma.post.findMany({
+    where: {
+      deleted_at:
+        showDeleted === "true"
+          ? undefined
+          : showDeleted === "onlyDeleted"
+          ? { not: null }
+          : null,
+      category_id: category ? category.toString() : undefined,
+      published_at:
+        status === "published"
+          ? { not: null }
+          : status === "draft"
+          ? null
+          : undefined,
+    },
+  });
 };
 
-export const getPostById = (id: number) => {
-  return db("posts").where({ id, deleted_at: null }).first();
+export const getPostById = async (id: number) => {
+  return await prisma.post.findUnique({
+    where: { id: id.toString(), deleted_at: null },
+  });
 };
 
-export const createPost = (data: object) => {
-  return db("posts").insert(data).returning("*");
+export const createPost = async (data: {
+  title: string;
+  content: string;
+  category_id: number;
+}) => {
+  return await prisma.post.create({
+    data: {
+      title: data.title,
+      content: data.content,
+      category_id: data.category_id.toString(),
+    },
+  });
 };
 
-export const updatePost = (id: number, data: object) => {
-  return db("posts").where({ id }).update(data);
+export const updatePost = async (
+  id: number,
+  data: { title?: string; content?: string; category_id?: number }
+) => {
+  return await prisma.post.update({
+    where: { id: id.toString() },
+    data: {
+      ...data,
+      category_id: data.category_id?.toString(),
+    },
+  });
 };
 
-export const deletePost = (id: number) => {
-  return db("posts").where({ id }).update({ deleted_at: new Date() });
+export const deletePost = async (id: number) => {
+  return await prisma.post.update({
+    where: { id: id.toString() },
+    data: { deleted_at: new Date() },
+  });
 };

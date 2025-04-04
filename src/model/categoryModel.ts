@@ -1,31 +1,41 @@
-import db from "src/config/db";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-export const getAllCategories = (showDeleted: string) => {
-  const query = db("categories");
-  if (showDeleted === "true") {
-  } else if (showDeleted === "onlyDeleted") {
-    query.whereNot("deleted_at", null);
-  } else {
-    query.where("deleted_at", null);
-  }
-  return query;
+export const getAllCategories = async (showDeleted: string) => {
+  return await prisma.category.findMany({
+    where:
+      showDeleted === "true"
+        ? {}
+        : showDeleted === "onlyDeleted"
+        ? { deleted_at: { not: null } }
+        : { deleted_at: null },
+  });
 };
 
-export const getCategoryById = (id: number) => {
-  return db("categories").where({ id, deleted_at: null }).first();
+export const getCategoryById = async (id: number) => {
+  return await prisma.category.findUnique({
+    where: { id: id.toString(), deleted_at: null },
+  });
 };
 
-export const createCategory = (data: object) => {
-  return db("categories").insert(data).returning("*");
-  //   knexe özel yapılan değişikliği döndürür returning ile
+export const createCategory = async (name: string) => {
+  return await prisma.category.create({
+    data: {
+      name,
+    },
+  });
 };
 
-export const updateCategory = (id: number, data: object) => {
-  return db("categories").where({ id }).update(data);
+export const updateCategory = async (id: number, name: string) => {
+  return await prisma.category.update({
+    where: { id: id.toString() },
+    data: { name },
+  });
 };
 
-export const deleteCategory = (id: number) => {
-  return db("categories").where({ id }).update({ deleted_at: new Date() });
-  // soft delete yapılacağı için apdate ile tarihi güncelledi
-  // eğer geri getircek olsak deleted_at false yada null olarak güncellenirdi
+export const deleteCategory = async (id: number) => {
+  return await prisma.category.update({
+    where: { id: id.toString() },
+    data: { deleted_at: new Date() },
+  });
 };
